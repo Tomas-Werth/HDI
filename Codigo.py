@@ -26,19 +26,22 @@ for index, row in df.iterrows():
     data = data.astype(dtype= {"claim_id":"int64","marca_vehiculo":"object","antiguedad_vehiculo":"int64", "tipo_poliza":"int64", "taller":"int64", "partes_a_reparar":"int64", "partes_a_reemplazar":"int64"})  
     data.to_csv(args["dir"]+"Dataframe_1_"+ID+".csv", index=False, sep = args["sep"])
     subprocess.Popen(['python', args["dir"]+'Pipeline_1_2.py', ID])
-    subprocess.Popen(['python', args["dir"]+'Pipeline_3_5.py', ID])
-    
+    data=dill.load(open(args["dir"]+"pipeline_3.pkl" , 'rb'))(data)
+    data["marca_vehiculo_encoded"]=data["marca_vehiculo_encoded"].fillna(0).astype("int64")
+    data.to_csv(args["dir"]+"Dataframe_3_"+ID+".csv", index=False, sep = args["sep"])
+    subprocess.Popen(['python', args["dir"]+'Pipeline_4.py', ID])
+    data=dill.load(open(args["dir"]+"pipeline_5.pkl" , 'rb'))(data)
     flag=True  
     while flag==True:
-        if os.path.exists(args["dir"]+"Dataframe_2_"+ID+".csv") and os.path.exists(args["dir"]+"Dataframe_3_"+ID+".csv"):
+        print("vuelta")
+        if (os.path.exists(args["dir"]+"Dataframe_2_"+ID+".csv") and os.path.exists(args["dir"]+"Dataframe_3_"+ID+".csv") and os.path.exists(args["dir"]+"Dataframe_4_"+ID+".csv")):
             flag=False
+            
 
-    Dataframe_2=pd.read_csv(args["dir"]+"Dataframe_2_"+ID+".csv",sep = args["sep"])
-    Dataframe_3=pd.read_csv(args["dir"]+"Dataframe_3_"+ID+".csv",sep = args["sep"])
-    data=Dataframe_2.merge(Dataframe_3, how='outer')
-    data=dill.load(open(args["dir"]+"pipeline_4.pkl" , 'rb'))(data)
-    data["valor_vehiculo"]=data["valor_vehiculo"].fillna(3560).astype("int64")
-    data["valor_por_pieza"]=data["valor_por_pieza"].fillna(150)
+    Dataframe_4=pd.read_csv(args["dir"]+"Dataframe_4_"+ID+".csv",sep = args["sep"])
+    data=data.merge(Dataframe_4, how='outer')
+    print(data)
+
 
     if data["tipo_poliza"].values[0]!=4:
         data_modelo=data[["log_total_piezas","marca_vehiculo_encoded","valor_vehiculo", "valor_por_pieza", "antiguedad_vehiculo"]]
@@ -54,6 +57,7 @@ for index, row in df.iterrows():
     os.remove(args["dir"]+"Dataframe_1_"+ID+".csv")
     os.remove(args["dir"]+"Dataframe_2_"+ID+".csv")
     os.remove(args["dir"]+"Dataframe_3_"+ID+".csv")
+    os.remove(args["dir"]+"Dataframe_4_"+ID+".csv")
     
 end = time.time()
 print("It took", end - start, "seconds!")
