@@ -20,12 +20,6 @@ ID=sys.argv[1]
 data=pd.read_csv(args["dir"]+"Dataframe_1_"+ID+".csv",sep = args["sep"])
 
 
-
-data=dill.load(open(args["dir"]+"pipeline_1.pkl" , 'rb'))(data)
-data=dill.load(open(args["dir"]+"pipeline_2.pkl" , 'rb'))(data)
-data["log_total_piezas"]=data["log_total_piezas"].fillna(1.4545)
-
-
 if pd.isna(data["antiguedad_vehiculo"].values):
     data["antiguedad_vehiculo"]=1
 if pd.isna(data["tipo_poliza"].values):
@@ -36,6 +30,14 @@ if pd.isna(data["partes_a_reparar"].values):
     data["partes_a_reparar"]=3
 if pd.isna(data["partes_a_reemplazar"].values):
     data["partes_a_reemplazar"]=1
+
+
+data=dill.load(open(args["dir"]+"pipeline_1.pkl" , 'rb'))(data)
+data=dill.load(open(args["dir"]+"pipeline_2.pkl" , 'rb'))(data)
+data["log_total_piezas"]=data["log_total_piezas"].fillna(1.4545)
+
+
+
     
     
 print(ID)
